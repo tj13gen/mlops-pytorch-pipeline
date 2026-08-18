@@ -35,20 +35,20 @@ transform = transforms.Compose([
 
 def load_saved_model():
     global model
-    if MODEL_PATH.exists():
-        try:
-            model_instance = get_model(architecture="resnet18", num_classes=10, pretrained=False)
+    try:
+        model_instance = get_model(architecture="resnet18", num_classes=10, pretrained=False)
+        if MODEL_PATH.exists():
             checkpoint = torch.load(MODEL_PATH, map_location=device)
-            if "model_state_dict" in checkpoint:
+            if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
                 model_instance.load_state_dict(checkpoint["model_state_dict"])
-            else:
+            elif isinstance(checkpoint, dict):
                 model_instance.load_state_dict(checkpoint)
-            model_instance.to(device)
-            model_instance.eval()
-            model = model_instance
-        except Exception as e:
-            print(f"Error loading model checkpoint: {e}")
-            model = None
+        model_instance.to(device)
+        model_instance.eval()
+        model = model_instance
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        model = None
 
 
 @app.get("/health")
