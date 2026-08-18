@@ -20,9 +20,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest httpx
         pip install -r requirements/train.txt
         pip install -r requirements/serve.txt
+        pip install pytest
 
     - name: Run Pytest Suite
       run: |
