@@ -8,7 +8,14 @@ from torchvision import transforms
 
 from model import get_model
 
-app = FastAPI(title="PyTorch Model Serving API", version="1.0.0")
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_saved_model()
+    yield
+
+app = FastAPI(title="PyTorch Model Serving API", version="1.0.0", lifespan=lifespan)
 
 MODEL_PATH = Path("/app/checkpoints/classifier_v1.pt")
 if not MODEL_PATH.exists():
@@ -43,9 +50,6 @@ def load_saved_model():
             print(f"Error loading model checkpoint: {e}")
             model = None
 
-@app.on_event("startup")
-def startup_event():
-    load_saved_model()
 
 @app.get("/health")
 def health_check():
