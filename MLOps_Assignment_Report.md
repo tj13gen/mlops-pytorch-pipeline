@@ -260,16 +260,14 @@ curl -X POST http://localhost:8080/predict -F "image=@test_image.png"
 
 ---
 
-## 7. Reflection Write-up (300–500 words)
+## 7. Project Reflection
 
-### What was the most challenging part?
+### Key Challenges & Learnings
 
-The primary technical challenge in implementing this end-to-end PyTorch MLOps pipeline lay in harmonizing state persistence, container lifecycles, and configuration consistency across training batch workloads and real-time inference services in Kubernetes.
+Building this end-to-end pipeline was an insightful exercise in connecting practical deep learning with real-world infrastructure. 
 
-In a containerized environment, training workloads operate as transient batch Jobs requiring write access to model weights and dataset caches, while serving deployments demand high-availability, read-only access to checkpoint artifacts with continuous health monitoring. Designing the shared volume architecture with appropriate `PersistentVolumeClaim` access modes and directory mounts (`/app/checkpoints` and `/app/data`) required strict coordination to ensure that the serving replicas never attempted to read incomplete checkpoint files during active training epochs.
+The most challenging part of the project was orchestrating the transition of model artifacts between training and serving inside Kubernetes. Training runs as a batch job that creates and updates model checkpoints, while serving runs continuously and needs immediate access to those saved weights. Setting up shared persistent volume claims (`PVCs`) and making sure the inference service didn't try to load incomplete weights during an active training epoch required careful coordination.
 
-Another significant hurdle involved configuring resilient health check orchestration and zero-downtime rolling updates (`maxSurge: 1`, `maxUnavailable: 0`). Because deep learning models take non-trivial time to load weights into memory and initialize compute graphs, standard HTTP health probes can easily trigger false failure loops if not tuned properly. By configuring an initial delay of 15 seconds and setting a 5-second polling interval on the `/health` Readiness probe, we ensured that the Kubernetes Service traffic router only directs user inference requests to pods that have fully hydrated the PyTorch model checkpoint into memory.
+Another key learning point was configuring Kubernetes health probes and container permissions. Because PyTorch takes a few seconds to load the model into memory upon startup, early health checks can fail and cause pods to restart repeatedly. Adding an initial delay to the readiness probe solved this issue and ensured that traffic is only sent to pods once the model is fully loaded. Additionally, configuring non-root user permissions in Docker while retaining read access to mounted volumes highlighted important container security practices.
 
-Additionally, optimizing multi-stage Docker builds presented subtle challenges in image footprint reduction and security hardening. Separating heavy training build toolchains from lightweight inference runtimes reduced attack surfaces and image pull times. Transitioning the serving container to run under an unprivileged `appuser` (UID 1000) while still retaining permissions to read mounted checkpoint volumes required explicit permission handling in the Docker build stages and Kubernetes pod security contexts.
-
-Finally, managing the configuration lifecycle via Kubernetes `ConfigMap` resources ensured that hyperparameters like learning rate, batch size, and early stopping patience could be modified dynamically without rebuilding container images. Structuring clean Git feature-branch workflows with automated CI testing ensured that model architectures, Dockerfiles, and Kubernetes manifests remained reproducible, robust, and production-ready.
+Overall, moving beyond local scripts to containerized workflows with automated CI and Kubernetes orchestration gave me a solid hands-on understanding of maintaining reliable, production-ready ML workloads.
