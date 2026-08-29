@@ -1,0 +1,41 @@
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+\geometry{margin=0.75in}
+
+% Minimalist Color Palette
+\definecolor{primaryText}{RGB}{30, 41, 59}
+\definecolor{headingColor}{RGB}{15, 23, 42}
+\definecolor{accentColor}{RGB}{14, 116, 144}
+\definecolor{codeBg}{RGB}{248, 250, 252}
+\definecolor{codeBorder}{RGB}{226, 232, 240}
+\definecolor{linkNavy}{RGB}{29, 78, 216}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkNavy,
+    filecolor=linkNavy,
+    urlcolor=linkNavy,
+    citecolor=linkNavy
+}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+% Table styling
+\usepackage{colortbl}
+\rowcolors{2}{codeBg}{white}
+
+% Header / Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{gray} MLOps Assignment 3 | Deploying PyTorch with Docker \& Kubernetes}
+\fancyhead[R]{\small\color{gray} B.N.Tejasri (DA25M629)}
+\fancyfoot[C]{\small\color{gray} Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}

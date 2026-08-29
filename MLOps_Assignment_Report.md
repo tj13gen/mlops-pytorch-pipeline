@@ -35,30 +35,20 @@ All development followed a strict Git branching model with Conventional Commits,
 
 The system implements an automated, containerized deep learning lifecycle from local training to scalable Kubernetes deployment:
 
-```
-                       +-------------------------------------------------------+
-                       |              Kubernetes Cluster (ml-training)         |
-                       |                                                       |
-                       |  +---------------------+      +--------------------+  |
-                       |  | ConfigMap           |      | PersistentVolume   |  |
-                       |  | training-config     |      | /app/checkpoints   |  |
-                       |  +----------+----------+      +---------+----------+  |
-                       |             |                           |             |
-                       |             v                           v             |
-                       |  +----------+----------+      +---------+----------+  |
-                       |  | Training Job        |      | Serving Deployment |  |
-                       |  | (ResNet-18 Job)     |----> | (FastAPI Replicas) |  |
-                       |  +---------------------+      +----------+---------+  |
-                       |                                          |            |
-                       |                                          v            |
-                       |                               +----------+---------+  |
-                       |                               | ClusterIP Service  |  |
-                       |                               | (Port 80 -> 8080)  |  |
-                       |                               +----------+---------+  |
-                       +------------------------------------------|------------+
-                                                                  |
-                                                           [ curl /predict ]
-```
+\begin{center}
+\includegraphics[width=0.88\textwidth]{architecture_diagram.pdf}
+\end{center}
+
+### Architecture Components & Workflow
+
+| Component | Technology | Role & Interaction |
+| :--- | :--- | :--- |
+| **ConfigMap** | `v1/ConfigMap` | Injects runtime training hyperparameters (learning rate, batch size, epochs, paths) without image rebuilds. |
+| **Persistent Storage** | `PersistentVolumeClaim` | Stores dataset cache (`/app/data`) and persists model checkpoints (`/app/checkpoints`). |
+| **Training Job** | `batch/v1 Job` | Executes containerized PyTorch ResNet-18 training, early stopping, and exports `.pt` checkpoints. |
+| **Serving Deployment** | `apps/v1 Deployment` | Runs 2 FastAPI inference replicas with read-only checkpoint mounts and zero-downtime rolling updates. |
+| **ClusterIP Service** | `v1/Service` | Routes internal traffic from port 80 to container port 8080 with automated load distribution. |
+| **Auto-Scaler (HPA)** | `autoscaling/v2` | Automatically scales inference replicas from 2 to 10 pods when CPU utilization exceeds 80%. |
 
 ---
 
@@ -66,34 +56,46 @@ The system implements an automated, containerized deep learning lifecycle from l
 
 ```
 mlops-pytorch-pipeline/
-|-- README.md
-|-- .gitignore
+|-- README.md                         # Project documentation, architecture & quickstart guide
+|-- MLOps_Assignment_Report.pdf       # Consolidated submission report document
+|-- .gitignore                        # Git ignore rules for checkpoints, data & venv
 |-- .github/
 |   \-- workflows/
-|       \-- ci.yml
+|       \-- ci.yml                    # Automated GitHub Actions test & build pipeline
 |-- src/
-|   |-- train.py
-|   |-- model.py
-|   |-- dataset.py
-|   \-- serve.py
+|   |-- train.py                      # PyTorch training loop with early stopping & JSON logging
+|   |-- model.py                      # ResNet-18 model definition for CIFAR-10 classification
+|   |-- dataset.py                    # Data loaders & data augmentation pipelines
+|   \-- serve.py                      # FastAPI inference API with /health and /predict endpoints
 |-- configs/
-|   \-- training_config.yaml
+|   \-- training_config.yaml          # Hyperparameters and directory path configurations
 |-- docker/
-|   |-- Dockerfile.train
-|   \-- Dockerfile.serve
+|   |-- Dockerfile.train              # Multi-stage Dockerfile for containerized training
+|   \-- Dockerfile.serve              # Hardened, non-root Dockerfile for inference serving
 |-- k8s/
-|   |-- namespace.yaml
-|   |-- training-job.yaml
-|   |-- serving-deployment.yaml
-|   |-- serving-service.yaml
-|   |-- configmap.yaml
-|   \-- hpa.yaml
+|   |-- namespace.yaml                # Dedicated ml-training namespace manifest
+|   |-- configmap.yaml                # Kubernetes ConfigMap for decoupled training settings
+|   |-- training-job.yaml             # Kubernetes Job with PVC mounts and GPU tolerations
+|   |-- serving-deployment.yaml       # High-availability Serving Deployment with health probes
+|   |-- serving-service.yaml          # ClusterIP service exposing the prediction API
+|   \-- hpa.yaml                      # Horizontal Pod Autoscaler for inference workloads
 |-- requirements/
-|   |-- train.txt
-|   \-- serve.txt
+|   |-- train.txt                     # Pinned dependencies for model training
+|   \-- serve.txt                     # Lean dependencies for model inference
 \-- tests/
-    \-- test_model.py
+    \-- test_model.py                 # PyTest test suite verifying model & API endpoints
 ```
+
+### Module Directory Breakdown
+
+| Directory / Layer | Purpose | Key Artifacts |
+| :--- | :--- | :--- |
+| **`src/`** | Core ML & API Source Code | Model graphs, DataLoader transforms, training loop, FastAPI endpoints |
+| **`configs/`** | Workload Configuration | YAML hyperparameters decoupled from container code |
+| **`docker/`** | Containerization Layer | Multi-stage training image & secure non-root serving runtime |
+| **`k8s/`** | Orchestration & Deployment | Namespaces, Jobs, Deployments, Services, ConfigMaps, and HPA |
+| **`requirements/`** | Dependency Management | Segregated train and serve requirement lockfiles |
+| **`tests/`** | Quality Assurance | PyTest unit & integration tests executed by GitHub Actions CI |
 
 ---
 

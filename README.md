@@ -4,31 +4,55 @@ A production-ready PyTorch image classification pipeline featuring containerized
 
 ---
 
-## 🏗 Architecture Diagram
+## 🏗 Architecture Overview
+
+![Architecture Diagram](architecture_diagram.png)
+
+### System Components
+
+| Component | Type | Responsibility |
+| :--- | :--- | :--- |
+| **ConfigMap** | `v1/ConfigMap` | Decoupled training hyperparameters (batch size, learning rate, epochs) |
+| **Persistent Storage** | `PersistentVolumeClaim` | Shared storage for CIFAR-10 data cache and exported model weights |
+| **Training Job** | `batch/v1 Job` | ResNet-18 batch training with early stopping and GPU acceleration |
+| **Model Serving** | `apps/v1 Deployment` | 2-replica FastAPI inference service with rolling update & health probes |
+| **ClusterIP Service** | `v1/Service` | Internal load-balanced network gateway on port 80 -> 8080 |
+| **Auto-Scaler (HPA)** | `autoscaling/v2` | Dynamic replica scaling (2 to 10 pods) based on 80% CPU utilization |
+
+---
+
+## 📁 Repository Structure
 
 ```
-                       +-------------------------------------------------------+
-                       |              Kubernetes Cluster (ml-training)         |
-                       |                                                       |
-                       |  +---------------------+      +--------------------+  |
-                       |  | ConfigMap           |      | PersistentVolume   |  |
-                       |  | training-config     |      | /app/checkpoints   |  |
-                       |  +----------+----------+      +---------+----------+  |
-                       |             |                           |             |
-                       |             v                           v             |
-                       |  +----------+----------+      +---------+----------+  |
-                       |  | Training Job        |      | Serving Deployment |  |
-                       |  | (ResNet-18 Job)     |----> | (FastAPI Replicas) |  |
-                       |  +---------------------+      +----------+---------+  |
-                       |                                          |            |
-                       |                                          v            |
-                       |                               +----------+---------+  |
-                       |                               | ClusterIP Service  |  |
-                       |                               | (Port 80 -> 8080)  |  |
-                       |                               +----------+---------+  |
-                       +------------------------------------------|------------+
-                                                                  |
-                                                           [ curl /predict ]
+mlops-pytorch-pipeline/
+|-- README.md                         # Project documentation & architecture overview
+|-- MLOps_Assignment_Report.pdf       # Consolidated submission report
+|-- .gitignore                        # Git exclusion rules
+|-- .github/
+|   \-- workflows/
+|       \-- ci.yml                    # Automated CI testing and Docker build pipeline
+|-- src/
+|   |-- train.py                      # Training loop with JSON logging & early stopping
+|   |-- model.py                      # ResNet-18 model architecture
+|   |-- dataset.py                    # Data loader with augmentation pipelines
+|   \-- serve.py                      # FastAPI inference API with health checks
+|-- configs/
+|   \-- training_config.yaml          # YAML training hyperparameters
+|-- docker/
+|   |-- Dockerfile.train              # Multi-stage training image
+|   \-- Dockerfile.serve              # Hardened, non-root serving runtime
+|-- k8s/
+|   |-- namespace.yaml                # Dedicated ml-training namespace
+|   |-- configmap.yaml                # Decoupled training settings
+|   |-- training-job.yaml             # Kubernetes Job with PVC & GPU tolerations
+|   |-- serving-deployment.yaml       # High-availability Serving Deployment
+|   |-- serving-service.yaml          # ClusterIP service exposing prediction endpoint
+|   \-- hpa.yaml                      # Horizontal Pod Autoscaler
+|-- requirements/
+|   |-- train.txt                     # Pinned training dependencies
+|   \-- serve.txt                     # Minimal inference dependencies
+\-- tests/
+    \-- test_model.py                 # PyTest test suite
 ```
 
 ---
