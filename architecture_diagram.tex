@@ -1,94 +1,108 @@
-\documentclass[tikz,border=12pt]{standalone}
+\documentclass[tikz,border=16pt]{standalone}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, backgrounds, fit, shadows}
 
-\definecolor{k8sbg}{RGB}{245, 247, 250}
-\definecolor{k8sborder}{RGB}{195, 207, 217}
-\definecolor{configBg}{RGB}{230, 246, 240}
-\definecolor{configBorder}{RGB}{46, 133, 94}
-\definecolor{configText}{RGB}{30, 86, 61}
-\definecolor{pvcBg}{RGB}{254, 244, 230}
-\definecolor{pvcBorder}{RGB}{204, 116, 36}
-\definecolor{pvcText}{RGB}{140, 72, 16}
-\definecolor{jobBg}{RGB}{235, 243, 253}
+\definecolor{k8sbg}{RGB}{248, 250, 252}
+\definecolor{k8sborder}{RGB}{203, 213, 225}
+\definecolor{configBg}{RGB}{236, 253, 245}
+\definecolor{configBorder}{RGB}{16, 185, 129}
+\definecolor{configText}{RGB}{6, 95, 70}
+\definecolor{pvcBg}{RGB}{255, 251, 235}
+\definecolor{pvcBorder}{RGB}{245, 158, 11}
+\definecolor{pvcText}{RGB}{146, 64, 14}
+\definecolor{jobBg}{RGB}{239, 246, 255}
 \definecolor{jobBorder}{RGB}{59, 130, 246}
 \definecolor{jobText}{RGB}{30, 64, 175}
-\definecolor{serveBg}{RGB}{245, 238, 254}
-\definecolor{serveBorder}{RGB}{147, 51, 234}
+\definecolor{serveBg}{RGB}{250, 245, 255}
+\definecolor{serveBorder}{RGB}{168, 85, 247}
 \definecolor{serveText}{RGB}{107, 33, 168}
-\definecolor{svcBg}{RGB}{230, 248, 250}
-\definecolor{svcBorder}{RGB}{14, 165, 233}
-\definecolor{svcText}{RGB}{3, 105, 161}
-\definecolor{clientBg}{RGB}{243, 244, 246}
-\definecolor{clientBorder}{RGB}{107, 114, 128}
-\definecolor{clientText}{RGB}{31, 41, 55}
+\definecolor{svcBg}{RGB}{240, 253, 250}
+\definecolor{svcBorder}{RGB}{20, 184, 166}
+\definecolor{svcText}{RGB}{15, 118, 110}
+\definecolor{clientBg}{RGB}{241, 245, 249}
+\definecolor{clientBorder}{RGB}{100, 116, 139}
+\definecolor{clientText}{RGB}{30, 41, 59}
 
 \begin{document}
 \begin{tikzpicture}[
     font=\sffamily,
     >=Stealth,
-    node distance=2.2cm,
-    clusterBg/.style={fill=k8sbg, draw=k8sborder, line width=1.2pt, rounded corners=10pt},
-    card/.style={rounded corners=6pt, line width=1pt, align=center, inner sep=9pt, drop shadow={opacity=0.12, shadow xshift=1pt, shadow yshift=-1pt}},
-    configBox/.style={card, fill=configBg, draw=configBorder, text=configText},
-    pvcBox/.style={card, fill=pvcBg, draw=pvcBorder, text=pvcText},
-    jobBox/.style={card, fill=jobBg, draw=jobBorder, text=jobText},
-    serveBox/.style={card, fill=serveBg, draw=serveBorder, text=serveText},
-    svcBox/.style={card, fill=svcBg, draw=svcBorder, text=svcText},
-    clientBox/.style={card, fill=clientBg, draw=clientBorder, text=clientText},
-    connArrow/.style={->, line width=1.3pt, draw=gray!70},
-    dataArrow/.style={->, line width=1.4pt, draw=jobBorder, dashed},
+    clusterBg/.style={fill=k8sbg, draw=k8sborder, line width=1.2pt, rounded corners=12pt},
+    card/.style={rounded corners=7pt, line width=1.1pt, align=center, inner sep=10pt, drop shadow={opacity=0.08, shadow xshift=1pt, shadow yshift=-1.5pt}},
+    configBox/.style={card, fill=configBg, draw=configBorder, text=configText, minimum width=4.8cm},
+    pvcBox/.style={card, fill=pvcBg, draw=pvcBorder, text=pvcText, minimum width=4.8cm},
+    jobBox/.style={card, fill=jobBg, draw=jobBorder, text=jobText, minimum width=4.8cm},
+    serveBox/.style={card, fill=serveBg, draw=serveBorder, text=serveText, minimum width=4.8cm},
+    svcBox/.style={card, fill=svcBg, draw=svcBorder, text=svcText, minimum width=4.8cm},
+    clientBox/.style={card, fill=clientBg, draw=clientBorder, text=clientText, minimum width=4.8cm},
+    connArrow/.style={->, line width=1.3pt, draw=gray!65},
+    dataArrow/.style={->, line width=1.3pt, draw=jobBorder, dashed},
     httpArrow/.style={<->, line width=1.4pt, draw=serveBorder}
 ]
 
-    % Nodes
+    % Top Row Nodes
     \node[configBox] (config) {
         \textbf{\large ConfigMap}\\
-        \texttt{training-config}\\
+        \texttt{training-config}\\[2pt]
         \footnotesize Hyperparameters: LR, Batch Size, Epochs
     };
 
-    \node[pvcBox, right=3.2cm of config] (pvc) {
+    \node[pvcBox, right=4.2cm of config] (pvc) {
         \textbf{\large PersistentVolumeClaim}\\
-        \texttt{checkpoints-pvc} \& \texttt{data-pvc}\\
+        \texttt{checkpoints-pvc} \& \texttt{data-pvc}\\[2pt]
         \footnotesize CIFAR-10 Dataset \& Checkpoint Storage
     };
 
-    \node[jobBox, below=1.8cm of config] (job) {
+    % Middle Row Nodes
+    \node[jobBox, below=2.4cm of config] (job) {
         \textbf{\large Kubernetes Job}\\
-        \texttt{pytorch-training-job}\\
+        \texttt{pytorch-training-job}\\[2pt]
         \footnotesize ResNet-18 Batch Training Container
     };
 
-    \node[serveBox, below=1.8cm of pvc] (serve) {
+    \node[serveBox, below=2.4cm of pvc] (serve) {
         \textbf{\large Serving Deployment}\\
-        \texttt{model-serving}\\
+        \texttt{model-serving}\\[2pt]
         \footnotesize FastAPI API (2 Replicas, Rolling Update)
     };
 
+    % Bottom Serving Stack Nodes
     \node[svcBox, below=1.8cm of serve] (svc) {
         \textbf{\large ClusterIP Service}\\
-        \texttt{model-serving}\\
+        \texttt{model-serving}\\[2pt]
         \footnotesize Port 80 $\rightarrow$ TargetPort 8080
     };
 
-    \node[clientBox, below=1.5cm of svc] (client) {
+    \node[clientBox, below=1.6cm of svc] (client) {
         \textbf{\large Client / User App}\\
         \footnotesize \texttt{POST /predict} \quad | \quad \texttt{GET /health}
     };
 
-    % Arrows
-    \draw[connArrow] (config) -- node[left, font=\footnotesize, text=gray!80!black] {mounts \texttt{/app/configs}} (job);
-    \draw[dataArrow] (pvc) -- node[right, font=\footnotesize, text=gray!80!black] {read/write \texttt{/app/data}} (job);
-    \draw[dataArrow] (pvc) -- node[left, font=\footnotesize, text=gray!80!black] {read-only mount} (serve);
-    \draw[connArrow] (job) -- node[above, font=\footnotesize\bfseries, text=jobText] {Saved Weights (\texttt{.pt})} (serve);
-    \draw[connArrow] (svc) -- node[right, font=\footnotesize, text=gray!80!black] {routes to pod:8080} (serve);
-    \draw[httpArrow] (client) -- node[right, font=\footnotesize\bfseries, text=serveText] {HTTP Request / JSON} (svc);
+    % Arrows with cleanly separated labels
+    % 1. Config to Job
+    \draw[connArrow] (config.south) -- node[left=4pt, midway, font=\footnotesize, text=gray!80!black] {Mounts \texttt{/app/configs}} (job.north);
 
-    % Background Box
+    % 2. PVC to Job (Diagonal)
+    \draw[dataArrow] (pvc.south west) -- node[above=4pt, sloped, midway, font=\footnotesize, text=jobText] {Read/Write: \texttt{/app/data}} (job.north east);
+
+    % 3. PVC to Serve (Vertical)
+    \draw[dataArrow] (pvc.south) -- node[right=4pt, midway, font=\footnotesize, text=pvcText] {Read-Only: \texttt{/app/checkpoints}} (serve.north);
+
+    % 4. Job to Serve (Horizontal)
+    \draw[connArrow] (job.east) -- node[below=4pt, midway, font=\footnotesize\bfseries, text=jobText] {Trained Checkpoint (\texttt{.pt})} (serve.west);
+
+    % 5. Service to Serve (Vertical)
+    \draw[connArrow] (svc.north) -- node[right=4pt, midway, font=\footnotesize, text=gray!80!black] {Routes to Pod: 8080} (serve.south);
+
+    % 6. Client to Service (Vertical)
+    \draw[httpArrow] (client.north) -- node[right=4pt, midway, font=\footnotesize\bfseries, text=serveText] {HTTP Request / JSON} (svc.south);
+
+    % Background Box for Kubernetes Cluster
     \begin{scope}[on background layer]
-        \node[clusterBg, fit=(config) (pvc) (job) (serve) (svc), label={[anchor=north west, font=\bfseries\sffamily\color{jobText!80!black}, yshift=-8pt, xshift=12pt]north west:Kubernetes Cluster (\texttt{ml-training} Namespace)}] (cluster) {};
+        \node[clusterBg, fit={(config) (pvc) (job) (serve) (svc)}, inner xsep=20pt, inner ysep=24pt] (cluster) {};
+        % Cluster Header Label cleanly placed at the top-left of cluster bounding box
+        \node[anchor=north west, font=\bfseries\sffamily\color{jobText!90!black}, yshift=-7pt, xshift=14pt] at (cluster.north west) {Kubernetes Cluster (\texttt{ml-training} Namespace)};
     \end{scope}
 
 \end{tikzpicture}
