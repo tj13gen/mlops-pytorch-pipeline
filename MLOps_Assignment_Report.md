@@ -7,6 +7,8 @@
 
 | Field | Value |
 | :--- | :--- |
+| **Student Name** | B.N.Tejasri |
+| **Roll Number** | DA25M629 |
 | **Course** | MLOps & Infrastructure for Machine Learning (DA5402W) |
 | **GitHub Repository** | [https://github.com/tj13gen/mlops-pytorch-pipeline](https://github.com/tj13gen/mlops-pytorch-pipeline) |
 | **Default Branch** | `main` |
