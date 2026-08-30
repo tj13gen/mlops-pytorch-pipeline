@@ -193,6 +193,8 @@ ENTRYPOINT ["uvicorn", "src.serve:app", "--host", "0.0.0.0", "--port", "8080"]
 
 ---
 
+\newpage
+
 ## 6. End-to-End Local & Cluster Validation
 
 ### 6.1 Local Docker Workflow Verification
